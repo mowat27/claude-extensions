@@ -95,30 +95,75 @@ Extract from PRD:
 
 ### 3. Generate Tasks
 
-For each user journey in the PRD:
+**CRITICAL: Vertical Slices Over Horizontal Layers**
 
-#### Phase 1: E2E Test (if testing level 3, 4, or 5)
+Generate tasks that deliver complete user journeys vertically, not infrastructure horizontally.
 
-**Skip this phase entirely if testing level is 1 or 2.**
+For each user journey in the PRD, create ONE task slice that includes everything needed for that journey:
+1. E2E test (if testing level 3, 4, or 5)
+2. Implementation (all layers: DB → domain → API → UI as needed)
+3. Unit tests (if testing level 2, 4, or 5)
 
-Create a task to write a failing e2e test that documents the user journey. This task comes before any implementation.
+**Task ordering between slices:**
+1. **Setup** - Infrastructure task ONLY if project doesn't exist (Task 0)
+2. **Deletions** - Remove dead code that blocks new work
+3. **Bugs** - Fix broken things that prevent new features
+4. **Refactoring** - Clean code that must change before adding features
+5. **Features** - New user journeys, each as a complete vertical slice
 
-**E2E test lifecycle:**
-1. Write test for user journey
-2. Run test — verify it fails because feature doesn't exist (not because test is broken or environment misconfigured)
+**Within each journey slice:**
+1. Write e2e test (if testing level 3, 4, or 5)
+2. Run test — verify it fails because feature doesn't exist
 3. Mark test as `skip` with reason: "Verified failing - awaiting implementation"
-4. Implementation tasks reference which skipped test they will enable
-5. After implementation, unskip test and verify it passes
+4. Implement feature through all necessary layers (DB, domain, API, UI)
+5. Write unit tests for business logic (if testing level 2, 4, or 5)
+6. Unskip e2e test and verify it passes
+7. Verify all baseline requirements
 
-#### Phase 2: Implementation
-Break into tasks following this order:
-1. **Setup** - Project scaffolding, first task only (see below)
-2. **Deletions** - Remove dead code first
-3. **Bugs** - Fix broken things
-4. **Refactoring** - Clean before adding
-5. **Features** - New functionality last
+**Example (correct - vertical slicing):**
+```
+001.001: Setup project infrastructure (only if new project)
+001.002: User login journey
+  - E2E test for login flow
+  - DB: users table, auth schema
+  - API: POST /auth/login endpoint
+  - UI: login form component
+  - Unit tests: auth validation logic
+001.003: User registration journey
+  - E2E test for registration flow
+  - DB: extend users table
+  - API: POST /auth/register endpoint
+  - UI: registration form
+  - Unit tests: registration validation
+```
 
-**Setup task (if needed):**
+**Anti-pattern (incorrect - horizontal layering):**
+```
+001.001: Setup
+001.002: Write all e2e tests
+001.003: Build database schema
+001.004: Build all API endpoints
+001.005: Build all UI components
+```
+
+**When to split a journey into sub-tasks:**
+
+Only split if a journey is genuinely too large (8+ hour estimate). Split by user action within journey, NOT by technical layer:
+
+✅ Split by user action:
+```
+001.002a: Login with email/password
+001.002b: Login with OAuth provider
+```
+
+❌ Don't split by layer:
+```
+001.002a: Login API
+001.002b: Login UI
+```
+
+**Setup task (Task 0, only if needed):**
+
 Include a setup task as Task 0 when project infrastructure doesn't exist yet:
 - Generate app scaffolding
 - Configure test frameworks (Vitest, Playwright)
@@ -128,12 +173,14 @@ Include a setup task as Task 0 when project infrastructure doesn't exist yet:
 - All baseline infrastructure in place before any feature work
 
 **Unit test requirements (if testing level 2, 4, or 5):**
-For each implementation task that involves logic:
-- Add to description: "Write unit tests for [component/function]"
+
+For each journey slice that involves business logic:
+- Include in task description: "Write unit tests for [business logic]"
 - Add to acceptance criteria: "Unit tests cover new/changed logic"
 - Note: Follow existing test patterns in codebase (co-located vs separate, naming conventions)
 
 **Acceptance test requirements (if testing level 5):**
+
 Prompt user: "What additional acceptance tests are needed?"
 - Performance (response time targets)
 - Security (OWASP checks)
@@ -143,29 +190,38 @@ Prompt user: "What additional acceptance tests are needed?"
 
 Add corresponding tasks/criteria based on selection.
 
-#### Phase 3: Apply Fidelity Filter
+### 4. Apply Fidelity Filter
+
 For each potential task, check fidelity-dial.md:
 - Include if within level scope
 - Exclude if above level scope
 - Always include baseline.md requirements
 
-### 4. Task Structure
+### 5. Task Structure
 
 Each task must have:
 
 ```markdown
-## Task: {descriptive name}
+## Task: {descriptive name of user journey}
 
 **Type:** setup | deletion | bug | refactoring | feature
-**Journey:** {which user journey this supports}
-**Enables:** {which skipped e2e test this will enable, if applicable}
+**Slice:** {which complete user journey this delivers}
 **Testing:** {testing requirements for this task}
 
 ### Description
-{What needs to be done}
+{What needs to be done - describe the complete vertical slice}
+
+Include all layers needed:
+- E2E test (if applicable)
+- Database changes (if applicable)
+- Domain/business logic
+- API endpoints
+- UI components
+- Unit tests (if applicable)
 
 ### Acceptance Criteria
-- [ ] {Specific, verifiable criterion}
+- [ ] {Specific, verifiable criterion for the complete journey}
+- [ ] {Cover all layers of the slice}
 
 ### Testing Requirements
 {Include based on testing level:}
@@ -173,31 +229,33 @@ Each task must have:
 Level 1: (omit this section)
 
 Level 2 (unit only):
-- [ ] Unit tests cover new/changed logic
+- [ ] Unit tests cover business logic
 - [ ] Tests follow existing patterns
 
 Level 3 (e2e only):
-- [ ] E2E test passes (or skipped pending implementation)
+- [ ] E2E test fails before implementation
+- [ ] E2E test marked as skip with reason
+- [ ] E2E test passes after implementation
 
 Level 4 (unit + e2e):
-- [ ] Unit tests cover new/changed logic
-- [ ] E2E test passes (or skipped pending implementation)
+- [ ] E2E test fails before implementation
+- [ ] E2E test marked as skip with reason
+- [ ] Unit tests cover business logic
+- [ ] E2E test passes after implementation
 
 Level 5 (full suite):
-- [ ] Unit tests cover new/changed logic
-- [ ] E2E test passes
+- [ ] E2E test lifecycle complete
+- [ ] Unit tests cover business logic
 - [ ] {Specific acceptance tests as selected}
 
 ### Baseline Requirements
-- [ ] Logging in place
+- [ ] Logging in place for key operations
 - [ ] Lint + typecheck passing
 - [ ] Tests passing (if testing level >= 2)
-- [ ] Deployable
+- [ ] Deployable (no hardcoded secrets, env vars used)
+- [ ] Auth checks on protected routes
+- [ ] User input sanitized
 ```
-
-For e2e test tasks (level 3, 4, 5), acceptance criteria must include:
-- [ ] Test fails because feature doesn't exist
-- [ ] Test marked as skip with reason
 
 ## Output Format
 
@@ -226,28 +284,132 @@ Write to TASKS.md:
 
 ---
 
-## 001.001: {Setup task}
+## 001.001: {Setup task (only if needed)}
 ...
 
-## 001.002: Write failing e2e test for {journey}
+## 001.002: {First user journey - complete vertical slice}
 ...
 
-## 001.003: {next task}
+## 001.003: {Next user journey - complete vertical slice}
 ...
 ```
 
 ## Rules
 
-1. **One journey = one e2e test task first** - If testing level 3, 4, or 5
-2. **Order matters** - setup → deletions → bugs → refactoring → features
-3. **Fidelity is a ceiling** - Don't add tasks above the level
-4. **Baseline is a floor** - Always include non-negotiables
-5. **No inference** - Don't guess fidelity from PRD tone or scope
-6. **Prompt don't assume** - If fidelity not given, ask explicitly
-7. **E2E tests skip after verification** - Tests proven to fail correctly get skipped until implementation
-8. **Setup task when needed** - Include Task 0 if project infrastructure doesn't exist
-9. **Testing level is separate from fidelity** - Low fidelity can still have full testing
-10. **Detect before asking** - Inspect codebase before prompting for testing level
-11. **Default to level 4** - Unless user specifies otherwise or codebase suggests different
-12. **Skip e2e phase at level 1-2** - No e2e tests for spikes or unit-only
-13. **Follow existing patterns** - Match test file naming, locations, and utilities in codebase
+1. **Vertical not horizontal** - Deliver complete user journeys, not technical layers
+2. **One journey = one task** - E2E test + all implementation layers + unit tests together
+3. **Order within slice** - e2e test → verify fail → skip → implement (all layers) → unskip test
+4. **Order between slices** - setup → deletions → bugs → refactoring → features
+5. **Fidelity is a ceiling** - Don't add tasks above the level
+6. **Baseline is a floor** - Always include non-negotiables
+7. **No inference** - Don't guess fidelity from PRD tone or scope
+8. **Prompt don't assume** - If fidelity not given, ask explicitly
+9. **E2E tests skip after verification** - Tests proven to fail correctly get skipped until implementation
+10. **Setup task when needed** - Include Task 0 if project infrastructure doesn't exist
+11. **Testing level is separate from fidelity** - Low fidelity can still have full testing
+12. **Detect before asking** - Inspect codebase before prompting for testing level
+13. **Default to level 4** - Unless user specifies otherwise or codebase suggests different
+14. **Skip e2e phase at level 1-2** - No e2e tests for spikes or unit-only
+15. **Follow existing patterns** - Match test file naming, locations, and utilities in codebase
+16. **Complete slices over partial layers** - A working login is better than half of all features
+
+## Anti-Patterns to Avoid
+
+### ❌ Pattern 1: Horizontal Layering
+
+**Bad example:**
+```markdown
+## 001.002: Create command layer abstraction
+- Extract selectImage command
+- Add error type definitions
+- Update error mapping
+
+## 001.003: Create domain layer functions
+- Implement selectImageGeneration
+- Implement selectProseGeneration
+
+## 001.004: Refactor all routes
+- Apply command pattern to /images
+- Apply command pattern to /prose
+```
+
+**Why wrong:** Builds infrastructure horizontally across all features. No user value until all tasks complete.
+
+**Good example:**
+```markdown
+## 001.002: Select image for blog post
+- Write e2e test: user selects image from generation history
+- Verify test fails (feature doesn't exist)
+- Skip test with reason
+- Implement POST /api/images/:id/select (route → command → domain → DB)
+- Unit tests for selectImage command
+- Unskip e2e test, verify passes
+
+## 001.003: Select prose for blog post
+- Write e2e test: user selects prose from generation history
+- Implement POST /api/prose/:id/select (route → command → domain → DB)
+- Unit tests for selectProse command
+```
+
+**Why right:** Each task delivers a complete, testable user capability. Extract common patterns later if they emerge naturally.
+
+### ❌ Pattern 2: Test Phase Separation
+
+**Bad example:**
+```markdown
+## 001.002: Write all e2e tests
+- Test user login
+- Test user registration
+- Test password reset
+
+## 001.003: Implement auth features
+- Login endpoint
+- Registration endpoint
+- Password reset
+```
+
+**Why wrong:** Tests separated from implementation. Easy to skip unskipping tests.
+
+**Good example:**
+```markdown
+## 001.002: User login journey
+- E2E test for login flow
+- Verify fails, mark skip
+- Implement login (all layers)
+- Unskip test, verify passes
+
+## 001.003: User registration journey
+- E2E test for registration
+- Verify fails, mark skip
+- Implement registration (all layers)
+- Unskip test, verify passes
+```
+
+**Why right:** Test lifecycle tightly coupled with implementation. Can't forget to unskip.
+
+### ❌ Pattern 3: Infrastructure First
+
+**Bad example:**
+```markdown
+## 001.002: Set up auth middleware
+## 001.003: Create database schema
+## 001.004: Build API client wrapper
+## 001.005: Implement first feature
+```
+
+**Why wrong:** Speculative infrastructure before knowing what's needed.
+
+**Good example:**
+```markdown
+## 001.002: User login journey
+- Implement login (creates auth middleware as needed)
+- Creates users table as needed
+- Makes API calls directly
+
+## 001.003: User registration journey
+- Extends auth middleware if needed
+- Extends users table if needed
+- Reuses or extends API patterns from login
+```
+
+**Why right:** Infrastructure emerges from actual feature needs. No gold-plating.
