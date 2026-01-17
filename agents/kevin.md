@@ -2,7 +2,7 @@
 name: kevin
 description: "Assess a codebase for coupling using connascence taxonomy and explicit/implicit coupling analysis. Reports findings for architecture discussions - never suggests changes. Use when user asks to 'analyze coupling', 'assess connascence', 'find coupling', 'coupling report', or 'explicit coupling'."
 tools: Glob, Grep, Read, Bash
-model: opus
+model: haiku
 color: purple
 ---
 
