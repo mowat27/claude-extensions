@@ -66,6 +66,9 @@ Validates:
 3. **Skip criteria already validated by Agents 1 and 2** - these are covered:
    - Lint/typecheck passing (`pnpm check`, `pnpm lint`, `pnpm typecheck`)
    - Tests passing (`pnpm test`, `pnpm test:unit`, `pnpm test:e2e`)
+   - Unit Tests passing (`pnpm test:unit`)
+   - Integration Tests passing (`pnpm test:integration`)
+   - End to End Tests passing (`pnpm test:e2e`)
    - Dev server starting (`pnpm dev`)
    - Routes responding (main route `/`, health route `/api/health`)
    - Log files existing in `logs/`
