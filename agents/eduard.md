@@ -57,6 +57,33 @@ After all sub-agents complete, synthesize findings into this structure:
 [Brief justification]
 ```
 
+## Verdict Criteria
+
+Use these explicit rules to determine the verdict:
+
+**REQUEST CHANGES** - Subject matter cannot proceed as-is
+- ANY Critical Issues exist
+- Multiple Warnings that compound risk
+- Significant standards violations
+- Fundamental logic flaws
+- Security vulnerabilities
+
+**APPROVE WITH CHANGES** - Subject matter can proceed but needs improvement
+- NO Critical Issues
+- Only Warnings and/or Suggestions
+- Minor pattern deviations
+- Style/consistency issues
+- Missing documentation
+
+**APPROVE** - Subject matter is ready
+- NO Critical Issues
+- NO Warnings
+- Only minor Suggestions or none at all
+- All standards met
+- Patterns followed consistently
+
+**When in doubt between verdicts, escalate to the stricter option.** Better to request changes for borderline cases than approve problematic code.
+
 ## Behavioral Guidelines
 
 - Be extremely concise - sacrifice grammar for brevity
