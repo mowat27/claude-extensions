@@ -137,6 +137,12 @@ Confirm the technical design is complete and ready to draft the PRD.
 
 Determine the feature directory name:
 
+**If draft mode:**
+1. Generate a slug from the feature name (lowercase, hyphens, no special chars, 2-3 words max)
+2. Propose: "I'll create this in `tmp/{slug}/PRD.md`. Does this slug work?"
+3. Create `tmp/{slug}/PRD.md`
+
+**If normal mode:**
 1. Scan `docs/features/` to find existing feature directories
 2. Identify the highest feature number (e.g., `001-walking-skeleton` → 001)
 3. Increment to get the next feature number (e.g., 002)
@@ -149,7 +155,7 @@ Determine the feature directory name:
 6. Ask: "I'll create this in `docs/features/{number}-{slug}/`. Does this slug work, or would you prefer a different one?"
 7. If user suggests a different slug, use that instead
 
-Create the directory `docs/features/{number}-{slug}/` and the file `PRD.md` inside it with placeholder sections:
+Create the directory and the file `PRD.md` inside it with placeholder sections:
 
 - Summary
 - User Stories

@@ -73,6 +73,12 @@ docs/features/
 
 ## Phase 4: Generate PRD
 
+**If draft mode:**
+1. Generate a slug from the project/skeleton name (lowercase, hyphens, 2-3 words max)
+2. Propose: "I'll create this in `tmp/{slug}/PRD.md`. Does this slug work?"
+3. Create `tmp/{slug}/PRD.md` using `../assets/templates/prd.md`
+
+**If normal mode:**
 Create `docs/features/001-walking-skeleton/PRD.md` using `../assets/templates/prd.md`.
 
 Content should include the skeleton definition from Phase 1:
@@ -83,7 +89,7 @@ Content should include the skeleton definition from Phase 1:
 - **Data Flow**: ASCII diagram showing the request/response flow for this feature
 - **Dependencies**: External services, frameworks chosen
 
-Also create `docs/features/001-walking-skeleton/setup.md` documenting any manual setup required:
+Also create `setup.md` in the same directory as the PRD (either `tmp/{slug}/` or `docs/features/001-walking-skeleton/`) documenting any manual setup required:
 - External service account creation (Supabase, Vercel, cloud providers)
 - API key generation steps
 - OAuth configuration steps

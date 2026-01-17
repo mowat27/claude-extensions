@@ -7,6 +7,21 @@ description: Generate PRDs for features. Supports walking skeletons (greenfield 
 
 Unified PRD generation for different feature types. Routes to the appropriate workflow based on what you're building.
 
+## Draft Mode Detection
+
+Before asking about feature type, check if the user's request indicates this is a draft/temporary PRD. Look for phrases like:
+- "draft", "temporary", "temp", "working draft"
+- "hidden", "not for this branch"
+- "idea", "future feature", "planning ahead"
+- "don't want to pollute", "separate from current work"
+
+If detected, confirm: "This sounds like a draft PRD - I'll write it to `tmp/{slug}/PRD.md` to keep it separate from your active feature work. Correct?"
+
+When in draft mode, pass this context to the workflow. The workflow will:
+- Write to `tmp/{slug}/PRD.md` instead of `docs/features/{number}-{slug}/PRD.md`
+- Skip feature numbering entirely
+- For walking skeletons, still create `.claude/docs/` files normally (those aren't feature-specific)
+
 ## Entry Point
 
 When invoked, ask the user what type of feature they're building:
